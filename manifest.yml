@@ -1,7 +1,7 @@
 info:
   name: kidzania-api
   description: REST API for KidZania Moscow
-  version: 1.0
+  version: 1.2
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
@@ -41,7 +41,7 @@ alerts:
 
   - name: Errors rate
     elastic:
-      query: tag:"spray.api.4game.com" AND level:ERROR AND NOT throwable:com.datastax.driver*
+      query: tag:"kidzania-api" AND level:ERROR
       from: 10min
       warn: 10
       crit: 100
