@@ -21,7 +21,7 @@ func main() {
 	e.Use(mw.Logger())
 	e.Use(mw.Recover())
 
-	e.Post("/github/payload", func(c *echo.Context) error {
+	e.Post("/github/events", func(c *echo.Context) error {
 		body, err := ioutil.ReadAll(c.Request().Body)
 		if err != nil {
 			return err
