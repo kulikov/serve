@@ -40,7 +40,7 @@ func main() {
 			return c.JSON(http.StatusOK, event)
 
 		default:
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Only `push` events accepted!"})
+			return c.String(http.StatusBadRequest, "Only `push` events accepted!")
 		}
 	})
 
