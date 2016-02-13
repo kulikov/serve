@@ -16,8 +16,9 @@ build:
 deploy:
   marathon:
     http-balancer:
-      domain: { qa: api.4gametest.com, live: api.4game.com }
-      location: /rumble
+      domain: 
+        qa: api.kidzite.qa
+        live: api.kidzania.ru api.kidzite.space
     ports: ["http:9024", "jmx:22006"]
     instances: { qa: 1, live: 4 }
     mem: 512
