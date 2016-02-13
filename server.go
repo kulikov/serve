@@ -13,28 +13,8 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"./manifest"
-)
-
-type (
-	GithubPush struct {
-		Ref        string `json:"ref"`
-		Repository GithubRepo `json:"repository"`
-		Commits    []GithubCommit `json:"commits"`
-	}
-
-	GithubRepo struct {
-		ContentUrl string `json:"contents_url"`
-	}
-
-	GithubCommit struct {
-		Modified []string `json:"modified"`
-		Added    []string `json:"added"`
-		Removed  []string `json:"removed"`
-	}
-
-	GithubFile struct {
-		Content string `json:"content"`
-	}
+	"./github"
+	"./utils"
 )
 
 func main() {
@@ -49,7 +29,7 @@ func main() {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Only `push` events accepted!"})
 		}
 
-		event := &GithubPush{}
+		event := &github.Push{}
 
 		err := c.Bind(event)
 		if err != nil {
@@ -63,9 +43,7 @@ func main() {
 		for _, commit := range event.Commits {
 			log.Println(append(commit.Added, commit.Modified...))
 
-			log.Println("changes: ", contains("manifest.yml", append(commit.Added, commit.Modified...)))
-
-			if contains("manifest.yml", append(commit.Added, commit.Modified...)) {
+			if utils.Contains("manifest.yml", append(commit.Added, commit.Modified...)) {
 				modified = true
 			}
 		}
@@ -78,15 +56,15 @@ func main() {
 				return err
 			}
 
-			manifestFile := &GithubFile{}
+			fileContent := &github.FileContent{}
 			data, _ := ioutil.ReadAll(resp.Body)
 
-			err = json.Unmarshal(data, manifestFile)
+			err = json.Unmarshal(data, fileContent)
 			if err != nil {
 				return err
 			}
 
-			data, err = base64.StdEncoding.DecodeString(manifestFile.Content)
+			data, err = base64.StdEncoding.DecodeString(fileContent.Content)
 			if err != nil {
 				return err
 			}
@@ -102,13 +80,4 @@ func main() {
 
 	log.Print("Starting serve on :9090")
 	ec.Run(":9090")
-}
-
-func contains(elm string, list []string) bool {
-	for _, v := range list {
-		if v == elm {
-			return true
-		}
-	}
-	return false
 }
