@@ -19,3 +19,7 @@ type GithubCommit struct {
 type FileContent struct {
 	Content string `json:"content"`
 }
+
+type PushHandler interface {
+	Handle(event Push) error
+}
