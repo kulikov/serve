@@ -63,7 +63,7 @@ func main() {
 		for _, commit := range event.Commits {
 			log.Println(append(commit.Added, commit.Modified...))
 
-			log.Println("index: ", contains("manifest.yml", append(commit.Added, commit.Modified...)))
+			log.Println("changes: ", contains("manifest.yml", append(commit.Added, commit.Modified...)))
 
 			if contains("manifest.yml", append(commit.Added, commit.Modified...)) {
 				modified = true
