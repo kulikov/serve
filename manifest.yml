@@ -1,0 +1,46 @@
+info:
+  name: kidzania-api
+  description: REST API for kidzania.ru
+  version: 1.0
+  owner:
+    name: Dmitry Kulikov
+    email: kulikov.dm@gmail.com
+
+build:
+  - shell: >
+      sbt ';set version := "'${version}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
+
+  - marathon:
+      package: target/pack/package.tar.gz
+
+deploy:
+  marathon:
+    http-balancer:
+      domain: { qa: api.4gametest.com, live: api.4game.com }
+      location: /rumble
+    ports: ["http:9024", "jmx:22006"]
+    instances: { qa: 1, live: 4 }
+    mem: 512
+    cpu: 1
+
+alerts:
+  - name: RPS
+    graphite:
+      metric: sumSeries(inn.*.http.timer.api.all.m5_rate)
+      warn.max: 3000
+      crit.max: 4000
+      warn: { live: 200 }
+      crit: { live: 100 }
+
+  - name: Request time
+    graphite:
+      metric: averageSeries(inn.*.http.timer.api.all.p75)
+      warn.max: { live: 15 }
+      crit.max: { live: 30 }
+
+  - name: Errors rate
+    elastic:
+      query: tag:"spray.api.4game.com" AND level:ERROR AND NOT throwable:com.datastax.driver*
+      from: 10min
+      warn: 10
+      crit: 100
