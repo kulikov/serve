@@ -1,7 +1,7 @@
 info:
   name: kidzania-api
   description: REST API for KidZania Moscow
-  version: 1.2
+  version: 1.0
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
