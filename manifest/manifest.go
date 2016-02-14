@@ -77,16 +77,20 @@ func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
 		mft := &Manifest{Sha: file.Sha, Source: data}
 		yaml.Unmarshal(data, mft)
 
-		for _, plugin := range mh.Plugins {
-			go func() {
-				err := plugin.Run(conf, mft)
-
-				if err != nil {
-					log.Printf("%T: %s\n", plugin, err)
-				}
-			}()
-		}
+		mh.RunPlugins(conf, mft)
 	}
 
 	return nil
+}
+
+func (mh ManifestHandler) RunPlugins(conf *viper.Viper, mft *Manifest) {
+	for _, plugin := range mh.Plugins {
+		go func() {
+			err := plugin.Run(conf, mft)
+
+			if err != nil {
+				log.Printf("%T: %s\n", plugin, err)
+			}
+		}()
+	}
 }

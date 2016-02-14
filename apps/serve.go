@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	configFile := flag.String("config", "/etc/serve.yml", "Path to config file")
+	configFile := flag.String("config", "config.yml", "Path to config file")
 	flag.Parse()
 
 	conf := viper.New()
