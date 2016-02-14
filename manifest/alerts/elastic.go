@@ -66,7 +66,7 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 						`--attribute '{hits}->{total}' `+
 						"--perfvars '{hits}->{total}') \n"+
 						`echo "$? services.%s.%s perfdata=$(echo $result | sed 's/.*- total: \([0-9]*\).*/\\1/').0 `+
-						`total='$(echo $result | sed 's/.*total=\(.*\).*/\\1/') by query %s%s';"`,
+						`total=$(echo $result | sed 's/.*total=\(.*\).*/\\1/')' by query %s%s';"`,
 					warn,
 					crit,
 					conf.GetString("alerts.elastic.host"),
