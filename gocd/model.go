@@ -49,11 +49,11 @@ type (
 	}
 
 	Task struct {
-		string     `json:"type"`
-		Attributes []TaskAttribute `json:"attributes"`
+		Type       string         `json:"type"`
+		Attributes TaskAttributes `json:"attributes"`
 	}
 
-	TaskAttribute struct {
+	TaskAttributes struct {
 		Command          string   `json:"type"`
 		Arguments        []string `json:"arguments"`
 		RunIf            []string `json:"run_if"`

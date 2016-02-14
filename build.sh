@@ -5,8 +5,6 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 pushd $DIR
 
-for os in linux darwin; do
-  GOOS=$os CGO_ENABLED=0 go build -v -o dist/serve-$os apps/serve.go
-done
+GOOS=linux CGO_ENABLED=0 go build -v -o bin/serve apps/serve.go
 
 popd

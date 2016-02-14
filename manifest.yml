@@ -1,20 +1,21 @@
 info:
-  name: kidzania-api
-  description: REST API for KidZania Moscow
-  version: 1.1
-  tags: [kidzania]
+  name: serve
+  description: Infrastructure automation tools
+  version: 1.0
+  category: tools
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
 
 build:
-  - shell: >
-      sbt ';set version := "'${version}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
-
-  - marathon:
-      package: target/pack/package.tar.gz
+  - debian: {}
 
 deploy:
+  debian:
+    cluster:
+      qa: graphite.qa.inn.ru
+      live: graphite.lux.inn.eu
+
   marathon:
     http-balancer:
       domain:
