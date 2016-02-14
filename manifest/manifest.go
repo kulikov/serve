@@ -17,9 +17,10 @@ import (
 
 type (
 	Manifest struct {
-		Sha    string
-		Source []byte
-		Info   Info `yaml:"info"`
+		Sha       string
+		GitSshUrl string
+		Source    []byte
+		Info      Info `yaml:"info"`
 	}
 
 	Info struct {
@@ -75,7 +76,7 @@ func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
 			return err
 		}
 
-		mft := &Manifest{Sha: file.Sha, Source: data}
+		mft := &Manifest{Sha: file.Sha, GitSshUrl: event.Repository.SshUrl, Source: data}
 		yaml.Unmarshal(data, mft)
 
 		mh.RunPlugins(conf, mft)

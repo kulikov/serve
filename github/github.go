@@ -14,6 +14,7 @@ type Push struct {
 }
 
 type GithubRepo struct {
+	SshUrl     string `json:"ssh_url"`
 	ContentUrl string `json:"contents_url"`
 }
 

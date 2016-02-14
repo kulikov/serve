@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"../github"
+	"../gocd"
 	"../manifest"
 	"../manifest/alerts"
 )
@@ -33,6 +34,7 @@ func main() {
 		conf,
 		manifest.ManifestHandler{
 			Plugins: []manifest.Plugin{
+				gocd.DeployPlugin{},
 				alerts.GraphiteAlertPlugin{},
 				alerts.ElasticAlertPlugin{},
 			},
