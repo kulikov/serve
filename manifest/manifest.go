@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 
 	"gopkg.in/yaml.v2"
+	"github.com/spf13/viper"
 
 	"../github"
 	"../utils"
@@ -33,7 +34,7 @@ type (
 	}
 
 	Plugin interface {
-		Run(mft *Manifest) error
+		Run(conf *viper.Viper, mft *Manifest) error
 	}
 
 	ManifestHandler struct {
@@ -41,7 +42,7 @@ type (
 	}
 )
 
-func (mh ManifestHandler) Handle(event github.Push) error {
+func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
 	modified := false
 
 	for _, commit := range event.Commits {
@@ -78,7 +79,7 @@ func (mh ManifestHandler) Handle(event github.Push) error {
 
 		for _, plugin := range mh.Plugins {
 			go func() {
-				err := plugin.Run(mft)
+				err := plugin.Run(conf, mft)
 
 				if err != nil {
 					log.Printf("%T: %s\n", plugin, err)

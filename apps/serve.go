@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"flag"
 
+	"github.com/spf13/viper"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
@@ -13,45 +14,29 @@ import (
 )
 
 func main() {
-	ec := echo.New()
+	configFile := flag.String("config", "/etc/serve.yml", "Path to config file")
+	flag.Parse()
 
+	conf := viper.New()
+	conf.SetConfigFile(*configFile)
+	conf.SetConfigType("yml")
+	err := conf.ReadInConfig()
+	if err != nil {
+		log.Panicf("Fatal error config file: %s \n", err)
+	}
+
+	ec := echo.New()
 	ec.Use(middleware.Logger())
 	ec.Use(middleware.Recover())
 
-	handlers := []github.PushHandler{
+	ec.Post("/github/events", github.WebhookHandler(
+		conf,
 		manifest.ManifestHandler{
 			Plugins: []manifest.Plugin{
 				alerts.ElasticAlertPlugin{},
 			},
 		},
-	}
-
-	ec.Post("/github/events", func(c *echo.Context) error {
-		switch c.Request().Header.Get("X-GitHub-Event") {
-		case "push":
-			event := github.Push{}
-
-			err := c.Bind(&event)
-			if err != nil {
-				return err
-			}
-
-			for _, handler := range handlers {
-				go func() {
-					err := handler.Handle(event)
-
-					if err != nil {
-						log.Printf("%T: %s\n", handler, err)
-					}
-				}()
-			}
-
-			return c.JSON(http.StatusOK, event)
-
-		default:
-			return c.String(http.StatusBadRequest, "Only `push` events accepted!")
-		}
-	})
+	))
 
 	log.Print("Starting serve on :9090")
 
