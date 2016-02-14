@@ -47,7 +47,7 @@ func envVar(conf *viper.Viper, val interface{}, def ...string) string {
 func durationMillis(duration string) int {
 	duration = dayRegex.ReplaceAllStringFunc(duration, func(d string) string {
 		di, _ := strconv.Atoi(d)
-		return fmt.Sprintf("%vh", di*24)
+		return fmt.Sprintf("%vh", di * 24)
 	})
 
 	duration = hourRegex.ReplaceAllString(duration, "${1}h")
