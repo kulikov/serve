@@ -1,6 +1,11 @@
 package gocd
 
 type (
+	CreatePipline struct {
+		Group    string   `json:"group"`
+		Pipeline Pipeline `json:"pipeline"`
+	}
+
 	Pipeline struct {
 		Name         string        `json:"name"`
 		Materials    []Material    `json:"materials"`
