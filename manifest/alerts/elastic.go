@@ -55,11 +55,6 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 			crit := ea.threshold(conf, "c", el.CritMin, el.CritMax, el.Crit)
 
 			if warn != "" || crit != "" {
-				tags := ""
-				if len(mft.Info.Tags) > 0 {
-					tags = " #" + strings.Join(mft.Info.Tags, " #")
-				}
-
 				checks = append(checks, fmt.Sprintf(
 					`result=$(check_json.pl %s %s --url '%s/logstash-*/_search?q=`+
 						`(%s) AND timemillis:['$(( ($(date +%%s) * 1000) - %v ))' TO '$(($(date +%%s) * 1000))']&search_type=count' `+
@@ -75,7 +70,7 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 					mft.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					regexp.MustCompile(`[^\w\s:\-\.\(\)]+`).ReplaceAllString(el.Query, ""),
-					tags,
+					prepareTags(mft.Info.Tags),
 				))
 			}
 		}

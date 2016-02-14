@@ -72,3 +72,11 @@ func durationMillis(duration string) int {
 func generateCheckMkFile(path string, checks []string) error {
 	return ioutil.WriteFile(path, []byte("#!/bin/bash\n\n"+strings.Join(checks, "\n\n")), 0755)
 }
+
+func prepareTags(tags []string) string {
+	if len(tags) > 0 {
+		return " #" + strings.Join(tags, " #")
+	} else {
+		return ""
+	}
+}
