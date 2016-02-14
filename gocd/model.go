@@ -4,7 +4,7 @@ type (
 	Pipeline struct {
 		Name         string        `json:"name"`
 		Materials    []Material    `json:"materials"`
-		EnvVariables []EnvVariable `json:"environment_variables"`
+		EnvVariables []EnvVariable `json:"environment_variables,omitempty"`
 		Stages       []Stage       `json:"stages"`
 	}
 
@@ -29,17 +29,17 @@ type (
 		Name                  string   `json:"name"`
 		CleanWorkingDirectory bool     `json:"clean_working_directory"`
 		FetchMaterials        bool     `json:"fetch_materials"`
-		Approval              Approval `json:"approval"`
+		Approval              Approval `json:"approval,omitempty"`
 		Jobs                  []Job    `json:"jobs"`
 	}
 
 	Approval struct {
-		string        `json:"type"`
-		Authorization Authorization `json:"authorization"`
+		Type          string        `json:"type,omitempty"`
+		Authorization Authorization `json:"authorization,omitempty"`
 	}
 
 	Authorization struct {
-		Roles []string `json:"roles"`
+		Roles []string `json:"roles,omitempty"`
 	}
 
 	Job struct {
