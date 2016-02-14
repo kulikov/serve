@@ -2,6 +2,7 @@ info:
   name: kidzania-api
   description: REST API for KidZania Moscow
   version: 1.1
+  tags: [kidzania]
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
@@ -16,7 +17,7 @@ build:
 deploy:
   marathon:
     http-balancer:
-      domain: 
+      domain:
         qa: api.kidzite.qa
         live: api.kidzania.ru api.kidzite.space
     ports: ["http:9024", "jmx:22006"]

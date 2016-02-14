@@ -55,14 +55,21 @@ func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) err
 			crit := ga.threshold(conf, "c", g.CritMin, g.CritMax, g.Crit)
 
 			if warn != "" || crit != "" {
+				tags := ""
+				if len(mft.Info.Tags) > 0 {
+					tags = " #" + strings.Join(mft.Info.Tags, " #")
+				}
+
 				checks = append(checks, fmt.Sprintf(
-					`get_graphite_metric.sh -N services.%s.%s -f %d %s %s -m "%s"`,
+					`get_graphite_metric.sh -N services.%s.%s -f %d %s %s -m "%s" -d "%s%s"`,
 					mft.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					durationMillis(envVar(conf, g.From, "15m")),
 					warn,
 					crit,
 					regexp.MustCompile(`\s+`).ReplaceAllString(strings.Replace(g.Metric, `"`, `'`, -1), ""),
+					alert.Name,
+					tags,
 				))
 			}
 		}

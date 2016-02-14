@@ -55,13 +55,18 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 			crit := ea.threshold(conf, "c", el.CritMin, el.CritMax, el.Crit)
 
 			if warn != "" || crit != "" {
+				tags := ""
+				if len(mft.Info.Tags) > 0 {
+					tags = " #" + strings.Join(mft.Info.Tags, " #")
+				}
+
 				checks = append(checks, fmt.Sprintf(
 					`result=$(check_json.pl %s %s --url '%s/logstash-*/_search?q=`+
 						`(%s) AND timemillis:['$(( ($(date +%%s) * 1000) - %v ))' TO '$(($(date +%%s) * 1000))']&search_type=count' `+
 						`--attribute '{hits}->{total}' `+
 						"--perfvars '{hits}->{total}') \n"+
 						`echo "$? services.%s.%s perfdata=$(echo $result | sed 's/.*- total: \([0-9]*\).*/\\1/').0 `+
-						`total=$(echo $result | sed 's/.*total=\(.*\).*/\\1/') by query '%s';"`,
+						`total='$(echo $result | sed 's/.*total=\(.*\).*/\\1/') by query %s%s';"`,
 					warn,
 					crit,
 					conf.GetString("alerts.elastic.host"),
@@ -70,6 +75,7 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 					mft.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					regexp.MustCompile(`[^\w\s:\-\.\(\)]+`).ReplaceAllString(el.Query, ""),
+					tags,
 				))
 			}
 		}
