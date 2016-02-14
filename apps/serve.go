@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"flag"
+	"log"
 
-	"github.com/spf13/viper"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/spf13/viper"
 
 	"../github"
 	"../manifest"

@@ -1,15 +1,15 @@
 package manifest
 
 import (
-	"log"
-	"strings"
-	"io/ioutil"
-	"net/http"
-	"encoding/json"
 	"encoding/base64"
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
 
-	"gopkg.in/yaml.v2"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 
 	"../github"
 	"../utils"
@@ -25,7 +25,7 @@ type (
 	Info struct {
 		Name    string `yaml:"name"`
 		Version string `yaml:"version"`
-		Owner   Owner `yaml:"owner"`
+		Owner   Owner  `yaml:"owner"`
 	}
 
 	Owner struct {

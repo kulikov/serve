@@ -8,4 +8,3 @@ func Contains(elm string, list []string) bool {
 	}
 	return false
 }
-

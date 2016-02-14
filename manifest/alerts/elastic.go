@@ -1,13 +1,13 @@
 package alerts
 
 import (
-	"log"
 	"fmt"
-	"strings"
+	"log"
 	"regexp"
+	"strings"
 
-	"gopkg.in/yaml.v2"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 
 	"../../manifest"
 )
@@ -20,12 +20,12 @@ type (
 	}
 
 	ElasticAlerts struct {
-		Name    string `yaml:"name"`
+		Name    string        `yaml:"name"`
 		Elastic *ElasticAlert `yaml:"elastic"`
 	}
 
 	ElasticAlert struct {
-		Query string `yaml:"query"`
+		Query string      `yaml:"query"`
 		Warn  interface{} `yaml:"warn"`
 		Crit  interface{} `yaml:"crit"`
 	}
@@ -42,16 +42,16 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 			log.Println(el)
 
 			checks = append(checks, fmt.Sprintf(
-				"result=$(check_json.pl %v %v " +
-				"--url 'http://%s:9200/logstash-*/_search?q=" +
-				"(%s) AND timemillis:['$(( ($(date +%%s) * 1000) - %v ))' TO '$(($(date +%%s) * 1000))']&search_type=count' " +
-				"--attribute '{hits}->{total}' " +
-				"--perfvars '{hits}->{total}') \n" +
-				`echo "$? services.%s.%s perfdata=$(echo $result | sed 's/.*- total: \([0-9]*\).*/\\1/').0 ` +
-				`total=$(echo $result | sed 's/.*total=\(.*\).*/\\1/') by query '%s';" \n\n`,
+				"result=$(check_json.pl %v %v "+
+					"--url 'http://%s:9200/logstash-*/_search?q="+
+					"(%s) AND timemillis:['$(( ($(date +%%s) * 1000) - %v ))' TO '$(($(date +%%s) * 1000))']&search_type=count' "+
+					"--attribute '{hits}->{total}' "+
+					"--perfvars '{hits}->{total}') \n"+
+					`echo "$? services.%s.%s perfdata=$(echo $result | sed 's/.*- total: \([0-9]*\).*/\\1/').0 `+
+					`total=$(echo $result | sed 's/.*total=\(.*\).*/\\1/') by query '%s';" \n\n`,
 				el.Warn,
 				el.Crit,
-				"elastic." + conf.GetString("env"),
+				"elastic."+conf.GetString("env"),
 				strings.Replace(el.Query, "'", "'\\''", -1),
 				900000,
 				mft.Info.Name,

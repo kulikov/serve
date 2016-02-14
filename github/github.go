@@ -2,14 +2,14 @@ package github
 
 import (
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 	"log"
 	"net/http"
-	"github.com/spf13/viper"
 )
 
 type Push struct {
-	Ref        string `json:"ref"`
-	Repository GithubRepo `json:"repository"`
+	Ref        string         `json:"ref"`
+	Repository GithubRepo     `json:"repository"`
 	Commits    []GithubCommit `json:"commits"`
 }
 
@@ -32,7 +32,7 @@ type PushHandler interface {
 	Handle(conf *viper.Viper, event Push) error
 }
 
-func WebhookHandler(conf *viper.Viper, handlers... PushHandler) func(c *echo.Context) error {
+func WebhookHandler(conf *viper.Viper, handlers ...PushHandler) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		switch c.Request().Header.Get("X-GitHub-Event") {
 		case "push":
