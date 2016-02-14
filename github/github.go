@@ -17,6 +17,7 @@ type GithubCommit struct {
 }
 
 type FileContent struct {
+	Sha string `json:"sha"`
 	Content string `json:"content"`
 }
 

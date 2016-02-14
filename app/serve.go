@@ -7,8 +7,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
-	"./manifest"
-	"./github"
+	"../github"
+	"../manifest"
+	"../manifest/alerts"
 )
 
 func main() {
@@ -18,7 +19,11 @@ func main() {
 	ec.Use(middleware.Recover())
 
 	handlers := []github.PushHandler{
-		manifest.ManifestHandler{},
+		manifest.ManifestHandler{
+			Plugins: []manifest.Plugin{
+				alerts.ElasticAlertPlugin{},
+			},
+		},
 	}
 
 	ec.Post("/github/events", func(c *echo.Context) error {
@@ -33,7 +38,11 @@ func main() {
 
 			for _, handler := range handlers {
 				go func() {
-					handler.Handle(event)
+					err := handler.Handle(event)
+
+					if err != nil {
+						log.Printf("%T: %s\n", handler, err)
+					}
 				}()
 			}
 

@@ -16,15 +16,29 @@ import (
 
 type (
 	Manifest struct {
-		Info Info `yaml:"info"`
+		Sha    string
+		Source []byte
+		Info   Info `yaml:"info"`
 	}
 
 	Info struct {
 		Name    string `yaml:"name"`
 		Version string `yaml:"version"`
+		Owner   Owner `yaml:"owner"`
 	}
 
-	ManifestHandler struct{}
+	Owner struct {
+		Name  string `yaml:"name"`
+		Email string `yaml:"email"`
+	}
+
+	Plugin interface {
+		Run(mft *Manifest) error
+	}
+
+	ManifestHandler struct {
+		Plugins []Plugin
+	}
 )
 
 func (mh ManifestHandler) Handle(event github.Push) error {
@@ -46,23 +60,31 @@ func (mh ManifestHandler) Handle(event github.Push) error {
 			return err
 		}
 
-		fileContent := &github.FileContent{}
+		file := &github.FileContent{}
 		data, _ := ioutil.ReadAll(resp.Body)
 
-		err = json.Unmarshal(data, fileContent)
+		err = json.Unmarshal(data, file)
 		if err != nil {
 			return err
 		}
 
-		data, err = base64.StdEncoding.DecodeString(fileContent.Content)
+		data, err = base64.StdEncoding.DecodeString(file.Content)
 		if err != nil {
 			return err
 		}
 
-		manifest := &Manifest{}
-		yaml.Unmarshal(data, manifest)
+		mft := &Manifest{Sha: file.Sha, Source: data}
+		yaml.Unmarshal(data, mft)
 
-		log.Println(manifest)
+		for _, plugin := range mh.Plugins {
+			go func() {
+				err := plugin.Run(mft)
+
+				if err != nil {
+					log.Printf("%T: %s\n", plugin, err)
+				}
+			}()
+		}
 	}
 
 	return nil
