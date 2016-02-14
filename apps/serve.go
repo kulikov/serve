@@ -33,6 +33,7 @@ func main() {
 		conf,
 		manifest.ManifestHandler{
 			Plugins: []manifest.Plugin{
+				alerts.GraphiteAlertPlugin{},
 				alerts.ElasticAlertPlugin{},
 			},
 		},

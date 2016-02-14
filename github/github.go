@@ -44,13 +44,13 @@ func WebhookHandler(conf *viper.Viper, handlers ...PushHandler) func(c *echo.Con
 			}
 
 			for _, handler := range handlers {
-				go func() {
-					err := handler.Handle(conf, event)
+				go func(h PushHandler) {
+					err := h.Handle(conf, event)
 
 					if err != nil {
-						log.Printf("%T: %s\n", handler, err)
+						log.Printf("%T: %s\n", h, err)
 					}
-				}()
+				}(handler)
 			}
 
 			return c.JSON(http.StatusOK, event)

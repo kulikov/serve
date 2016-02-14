@@ -2,14 +2,14 @@ package alerts
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"log"
-	"strconv"
-	"strings"
 )
 
 var dayRegex = regexp.MustCompile(`(\d+)\s*(day|days)`)
@@ -23,11 +23,19 @@ func envVar(conf *viper.Viper, val interface{}, def ...string) string {
 	switch v := val.(type) {
 	case map[string]string:
 		res = v[conf.GetString("env")]
+	case map[interface{}]string:
+		res = v[conf.GetString("env")]
 	case map[string]int:
+		res = fmt.Sprintf("%v", v[conf.GetString("env")])
+	case map[interface{}]int:
 		res = fmt.Sprintf("%v", v[conf.GetString("env")])
 	case map[string]float32:
 		res = fmt.Sprintf("%v", v[conf.GetString("env")])
+	case map[interface{}]float32:
+		res = fmt.Sprintf("%v", v[conf.GetString("env")])
 	case map[string]interface{}:
+		res = fmt.Sprintf("%v", v[conf.GetString("env")])
+	case map[interface{}]interface{}:
 		res = fmt.Sprintf("%v", v[conf.GetString("env")])
 	default:
 		if val != nil {
@@ -35,7 +43,7 @@ func envVar(conf *viper.Viper, val interface{}, def ...string) string {
 		}
 	}
 
-	if res != "" {
+	if res != "" && res != "<nil>" {
 		return res
 	} else if len(def) > 0 {
 		return def[0]
@@ -47,7 +55,7 @@ func envVar(conf *viper.Viper, val interface{}, def ...string) string {
 func durationMillis(duration string) int {
 	duration = dayRegex.ReplaceAllStringFunc(duration, func(d string) string {
 		di, _ := strconv.Atoi(d)
-		return fmt.Sprintf("%vh", di * 24)
+		return fmt.Sprintf("%vh", di*24)
 	})
 
 	duration = hourRegex.ReplaceAllString(duration, "${1}h")

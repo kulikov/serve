@@ -85,12 +85,12 @@ func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
 
 func (mh ManifestHandler) RunPlugins(conf *viper.Viper, mft *Manifest) {
 	for _, plugin := range mh.Plugins {
-		go func() {
-			err := plugin.Run(conf, mft)
+		go func(p Plugin) {
+			err := p.Run(conf, mft)
 
 			if err != nil {
-				log.Printf("%T: %s\n", plugin, err)
+				log.Printf("%T: %s\n", p, err)
 			}
-		}()
+		}(plugin)
 	}
 }

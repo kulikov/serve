@@ -40,6 +40,8 @@ type (
 )
 
 func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
+	log.Println("Elastic")
+
 	elmft := ElasticManifest{}
 	yaml.Unmarshal(mft.Source, &elmft)
 
@@ -49,8 +51,8 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 		if el := alert.Elastic; el != nil {
 			log.Printf("Elastic: %v\n", el)
 
-			warn := threshold(conf, "w", el.WarnMin, el.WarnMax, el.Warn)
-			crit := threshold(conf, "c", el.CritMin, el.CritMax, el.Crit)
+			warn := ea.threshold(conf, "w", el.WarnMin, el.WarnMax, el.Warn)
+			crit := ea.threshold(conf, "c", el.CritMin, el.CritMax, el.Crit)
 
 			if warn != "" || crit != "" {
 				checks = append(checks, fmt.Sprintf(
@@ -80,7 +82,7 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 	}
 }
 
-func threshold(conf *viper.Viper, level string, vmin interface{}, vmax interface{}, vdef interface{}) string {
+func (ea ElasticAlertPlugin) threshold(conf *viper.Viper, level string, vmin interface{}, vmax interface{}, vdef interface{}) string {
 	min := envVar(conf, vmin)
 	max := envVar(conf, vmax, envVar(conf, vdef))
 
