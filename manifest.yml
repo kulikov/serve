@@ -44,5 +44,5 @@ alerts:
     elastic:
       query: tag:"kidzania-api" AND level:ERROR
       from: 10min
-      warn: 10
-      crit: 100
+      warn: 1
+      crit: 10
