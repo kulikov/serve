@@ -25,10 +25,9 @@ type (
 	}
 
 	Info struct {
-		Name    string   `yaml:"name"`
-		Version string   `yaml:"version"`
-		Tags    []string `yaml:"tags"`
-		Owner   Owner    `yaml:"owner"`
+		Name    string `yaml:"name"`
+		Version string `yaml:"version"`
+		Owner   Owner  `yaml:"owner"`
 	}
 
 	Owner struct {
