@@ -79,6 +79,8 @@ func HandleGithubChanges(conf *viper.Viper, plugins []Plugin, payload string) er
 		yaml.Unmarshal(data, manf)
 
 		RunPlugins(conf, plugins, manf)
+	} else {
+		log.Println("manifest.yml not changed")
 	}
 
 	return nil

@@ -9,7 +9,6 @@ import (
 	"../gocd"
 	"../manifest"
 	"../manifest/alerts"
-	"../webhook"
 )
 
 var manifestPlugins = []manifest.Plugin{
@@ -24,27 +23,6 @@ func main() {
 	app.Usage = "Automate your infrastructure!"
 
 	app.Commands = []cli.Command{
-		{
-			Name:  "hook-server",
-			Usage: "Start Webhook Server",
-			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:  "port",
-					Value: 9090,
-				},
-				cli.StringFlag{
-					Name:  "handlers",
-					Usage: "Path to dir with hook handlers scripts",
-				},
-			},
-			Action: func(c *cli.Context) {
-				if !c.IsSet("handlers") {
-					log.Fatalf("--handlers is required!")
-				}
-
-				webhook.StartWebHookServer(c.Int("port"), c.String("handlers"))
-			},
-		},
 		{
 			Name: "manifest",
 			Flags: []cli.Flag{
