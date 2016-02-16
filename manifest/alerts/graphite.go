@@ -40,7 +40,7 @@ type (
 )
 
 func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) error {
-	log.Println("Graphite")
+	log.Println("Run Graphite plugin")
 
 	grmanf := GraphiteManifest{}
 	yaml.Unmarshal(manf.Source, &grmanf)

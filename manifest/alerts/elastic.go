@@ -40,7 +40,7 @@ type (
 )
 
 func (ea ElasticAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) error {
-	log.Println("Elastic")
+	log.Println("Run Elastic plugin")
 
 	elmanf := ElasticManifest{}
 	yaml.Unmarshal(manf.Source, &elmanf)

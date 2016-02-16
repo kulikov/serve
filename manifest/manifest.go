@@ -13,6 +13,7 @@ import (
 
 	"../github"
 	"../utils"
+	"sync"
 )
 
 type (
@@ -92,8 +93,14 @@ func InitConfig(configFile string) (*viper.Viper, error) {
 }
 
 func RunPlugins(conf *viper.Viper, plugins []Plugin, manf *Manifest) {
+	wg := sync.WaitGroup{}
+
 	for _, plugin := range plugins {
+		wg.Add(1)
+
 		go func(p Plugin) {
+			defer wg.Done()
+
 			err := p.Run(conf, manf)
 
 			if err != nil {
@@ -101,4 +108,6 @@ func RunPlugins(conf *viper.Viper, plugins []Plugin, manf *Manifest) {
 			}
 		}(plugin)
 	}
+
+	wg.Wait()
 }
