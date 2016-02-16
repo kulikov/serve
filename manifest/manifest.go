@@ -36,17 +36,15 @@ type (
 	}
 
 	Plugin interface {
-		Run(conf *viper.Viper, mft *Manifest) error
-	}
-
-	ManifestHandler struct {
-		Plugins []Plugin
+		Run(conf *viper.Viper, manf *Manifest) error
 	}
 )
 
-func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
-	modified := false
+func HandleGithubChanges(conf *viper.Viper, plugins []Plugin, payload string) error {
+	event := &github.Push{}
+	json.Unmarshal([]byte(payload), event)
 
+	modified := false
 	for _, commit := range event.Commits {
 		log.Println("Changes: ", append(commit.Added, commit.Modified...))
 
@@ -76,19 +74,27 @@ func (mh ManifestHandler) Handle(conf *viper.Viper, event github.Push) error {
 			return err
 		}
 
-		mft := &Manifest{Sha: file.Sha, GitSshUrl: event.Repository.SshUrl, Source: data}
-		yaml.Unmarshal(data, mft)
+		manf := &Manifest{Sha: file.Sha, GitSshUrl: event.Repository.SshUrl, Source: data}
+		yaml.Unmarshal(data, manf)
 
-		mh.RunPlugins(conf, mft)
+		RunPlugins(conf, plugins, manf)
 	}
 
 	return nil
 }
 
-func (mh ManifestHandler) RunPlugins(conf *viper.Viper, mft *Manifest) {
-	for _, plugin := range mh.Plugins {
+func InitConfig(configFile string) (*viper.Viper, error) {
+	conf := viper.New()
+	conf.SetConfigFile(configFile)
+	conf.SetConfigType("yml")
+	err := conf.ReadInConfig()
+	return conf, err
+}
+
+func RunPlugins(conf *viper.Viper, plugins []Plugin, manf *Manifest) {
+	for _, plugin := range plugins {
 		go func(p Plugin) {
-			err := p.Run(conf, mft)
+			err := p.Run(conf, manf)
 
 			if err != nil {
 				log.Printf("%T: %s\n", p, err)

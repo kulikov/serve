@@ -39,15 +39,15 @@ type (
 	}
 )
 
-func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
+func (ea ElasticAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) error {
 	log.Println("Elastic")
 
-	elmft := ElasticManifest{}
-	yaml.Unmarshal(mft.Source, &elmft)
+	elmanf := ElasticManifest{}
+	yaml.Unmarshal(manf.Source, &elmanf)
 
 	checks := make([]string, 0)
 
-	for _, alert := range elmft.Alerts {
+	for _, alert := range elmanf.Alerts {
 		if el := alert.Elastic; el != nil {
 			log.Printf("Elastic: %v\n", el)
 
@@ -67,10 +67,10 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) erro
 					conf.GetString("alerts.elastic.host"),
 					strings.Replace(el.Query, `'`, `'\\''`, -1),
 					durationMillis(envVar(conf, el.From, "15m")),
-					mft.Info.Name,
+					manf.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					regexp.MustCompile(`[^\w\s:\-\.\(\)]+`).ReplaceAllString(el.Query, ""),
-					prepareTags(mft.Info.Tags),
+					prepareTags(manf.Info.Tags),
 				))
 			}
 		}

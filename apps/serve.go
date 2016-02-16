@@ -1,47 +1,80 @@
 package main
 
 import (
-	"flag"
 	"log"
+	"os"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/spf13/viper"
+	"github.com/codegangsta/cli"
 
-	"../github"
 	"../gocd"
 	"../manifest"
 	"../manifest/alerts"
+	"../webhook"
 )
 
+var manifestPlugins = []manifest.Plugin{
+	&gocd.DeployPlugin{},
+	&alerts.GraphiteAlertPlugin{},
+	&alerts.ElasticAlertPlugin{},
+}
+
 func main() {
-	configFile := flag.String("config", "config.yml", "Path to config file")
-	flag.Parse()
+	app := cli.NewApp()
+	app.Name = "serve"
+	app.Usage = "Automate your infrastructure!"
 
-	conf := viper.New()
-	conf.SetConfigFile(*configFile)
-	conf.SetConfigType("yml")
-	err := conf.ReadInConfig()
-	if err != nil {
-		log.Panicf("Fatal error config file: %s \n", err)
-	}
+	app.Commands = []cli.Command{
+		{
+			Name:  "hook-server",
+			Usage: "Start Webhook Server",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "port",
+					Value: 9090,
+				},
+				cli.StringFlag{
+					Name:  "handlers",
+					Usage: "Path to dir with hook handlers scripts",
+				},
+			},
+			Action: func(c *cli.Context) {
+				if !c.IsSet("handlers") {
+					log.Fatalf("--handlers is required!")
+				}
 
-	ec := echo.New()
-	ec.Use(middleware.Logger())
-	ec.Use(middleware.Recover())
-
-	ec.Post("/github/events", github.WebhookHandler(
-		conf,
-		manifest.ManifestHandler{
-			Plugins: []manifest.Plugin{
-				gocd.DeployPlugin{},
-				alerts.GraphiteAlertPlugin{},
-				alerts.ElasticAlertPlugin{},
+				webhook.StartWebHookServer(c.Int("port"), c.String("handlers"))
 			},
 		},
-	))
+		{
+			Name: "manifest",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "config",
+					Value: "config.yml",
+					Usage: "Path to config.yaml file",
+				},
+			},
+			Subcommands: []cli.Command{
+				{
+					Name:  "github-hook",
+					Usage: "Handle github hook event and check manifest changes",
+					Flags: []cli.Flag{
+						cli.StringFlag{Name: "payload"},
+					},
+					Action: func(c *cli.Context) {
+						conf, err := manifest.InitConfig(c.String("config"))
+						if err != nil {
+							log.Panic(err)
+						}
 
-	log.Print("Starting serve on :9090")
+						if err := manifest.HandleGithubChanges(conf, manifestPlugins, c.String("payload")); err != nil {
+							log.Panicln(err)
+						}
+					},
+				},
+			},
+		},
+	}
 
-	ec.Run(":9090")
+	app.Run(os.Args)
 }

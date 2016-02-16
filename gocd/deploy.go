@@ -1,8 +1,9 @@
 package gocd
 
 import (
+	"bytes"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -39,17 +40,17 @@ func (p Pipeline) addStage(s Stage) {
 	p.Stages = append(p.Stages, s)
 }
 
-func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
+func (ea DeployPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) error {
 	depl := DeployManifest{}
-	yaml.Unmarshal(mft.Source, &depl)
+	yaml.Unmarshal(manf.Source, &depl)
 
 	pipeline := Pipeline{
-		Name: mft.Info.Name,
+		Name: manf.Info.Name,
 		Materials: []Material{
 			Material{
 				Type: "git",
 				Attributes: MaterialAttrs{
-					Url:         mft.GitSshUrl,
+					Url:         manf.GitSshUrl,
 					Destination: "sources",
 				},
 			},
@@ -67,7 +68,7 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 						Name:      "Create-Package",
 						Resources: []string{"Builder", "Debian"},
 						Tasks: []Task{execTask(
-							"/var/go/inn-ci-tools/build-package.sh --suffix=-master --patch-version=$GO_PIPELINE_LABEL --repo=" + mft.GitSshUrl + " --distribution=unstable",
+							"/var/go/inn-ci-tools/build-package.sh --suffix=-master --patch-version=$GO_PIPELINE_LABEL --repo=" + manf.GitSshUrl + " --distribution=unstable",
 						)},
 					},
 				},
@@ -77,7 +78,7 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 
 	if depl.Deploy.Debian != nil {
 		deb := depl.Deploy.Debian
-		project := "inn-" + mft.Info.Name
+		project := "inn-" + manf.Info.Name
 		qaNodes := deb.Cluster["qa"]
 		liveNodes := deb.Cluster["live"]
 
@@ -90,7 +91,7 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 						Resources: []string{"Builder", "Debian"},
 						Tasks: []Task{execTask(
 							"dig +short "+qaNodes+" | sort | uniq | parallel -j 10",
-							"/var/go/inn-ci-tools/go/go-package-deploy.sh --target={} --project="+project+" --version="+mft.Info.Version+".$GO_PIPELINE_LABEL --purge-pattern="+project+"-v.*",
+							"/var/go/inn-ci-tools/go/go-package-deploy.sh --target={} --project="+project+" --version="+manf.Info.Version+".$GO_PIPELINE_LABEL --purge-pattern="+project+"-v.*",
 						)},
 					},
 				},
@@ -107,7 +108,7 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 						Resources: []string{"Builder", "Debian"},
 						Tasks: []Task{execTask(
 							"/var/go/inn-ci-tools/go/go-package-approve.sh",
-							"--suffix=-master --patch-version=$GO_PIPELINE_LABEL --project="+project+" --version="+mft.Info.Version+" --src-repo=unstable --dst-repo=stable",
+							"--suffix=-master --patch-version=$GO_PIPELINE_LABEL --project="+project+" --version="+manf.Info.Version+" --src-repo=unstable --dst-repo=stable",
 						)},
 					},
 				},
@@ -130,7 +131,7 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 						Tasks: []Task{execTask(
 							"dig +short "+liveNodes+" | sort | uniq | parallel -j 10",
 							"/var/go/inn-ci-tools/go/go-package-deploy.sh",
-							"--target={} --project="+project+" --version="+mft.Info.Version+".$GO_PIPELINE_LABEL --purge-pattern="+project+"-v.*",
+							"--target={} --project="+project+" --version="+manf.Info.Version+".$GO_PIPELINE_LABEL --purge-pattern="+project+"-v.*",
 						)},
 					},
 				},
@@ -138,26 +139,26 @@ func (ea DeployPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
 		}
 	}
 
-	resp, err := requestGo("GET", "/admin/pipelines/"+mft.Info.Name, nil, nil)
+	resp, err := requestGo("GET", "/admin/pipelines/"+manf.Info.Name, nil, nil)
 	if err != nil {
 		return err
 	}
 
 	if resp.StatusCode == 200 {
-		bytes, _ := json.Marshal(pipeline)
-		_, err := requestGo("PUT", "/admin/pipelines/"+mft.Info.Name, bytes, map[string]string{"If-Match": resp.Header.Get("ETag")})
+		body, _ := json.Marshal(pipeline)
+		_, err := requestGo("PUT", "/admin/pipelines/"+manf.Info.Name, body, map[string]string{"If-Match": resp.Header.Get("ETag")})
 		return err
 	} else if resp.StatusCode == 404 {
-		bytes, _ := json.Marshal(CreatePipline{"other", pipeline})
-		_, err := requestGo("POST", "/admin/pipelines", bytes, nil)
+		body, _ := json.Marshal(CreatePipline{"other", pipeline})
+		_, err := requestGo("POST", "/admin/pipelines", body, nil)
 		return err
 	} else {
-		return "Error " + resp.Status
+		return fmt.Errorf("Error %v", resp.Status)
 	}
 }
 
-func requestGo(method string, resource string, body io.Reader, headers map[string]string) (http.Response, error) {
-	req, _ := http.NewRequest(method, "https://go.inn.ru/go/api"+resource, body)
+func requestGo(method string, resource string, body []byte, headers map[string]string) (*http.Response, error) {
+	req, _ := http.NewRequest(method, "https://go.inn.ru/go/api"+resource, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/vnd.go.cd.v1+json")
 	req.SetBasicAuth("login", "pass")

@@ -39,15 +39,15 @@ type (
 	}
 )
 
-func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) error {
+func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) error {
 	log.Println("Graphite")
 
-	grmft := GraphiteManifest{}
-	yaml.Unmarshal(mft.Source, &grmft)
+	grmanf := GraphiteManifest{}
+	yaml.Unmarshal(manf.Source, &grmanf)
 
 	checks := make([]string, 0)
 
-	for _, alert := range grmft.Alerts {
+	for _, alert := range grmanf.Alerts {
 		if g := alert.Graphite; g != nil {
 			log.Printf("Graphite: %v\n", g)
 
@@ -57,14 +57,14 @@ func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, mft *manifest.Manifest) err
 			if warn != "" || crit != "" {
 				checks = append(checks, fmt.Sprintf(
 					`get_graphite_metric.sh -N services.%s.%s -f %d %s %s -m "%s" -d "%s%s"`,
-					mft.Info.Name,
+					manf.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					durationMillis(envVar(conf, g.From, "15m")),
 					warn,
 					crit,
 					regexp.MustCompile(`\s+`).ReplaceAllString(strings.Replace(g.Metric, `"`, `'`, -1), ""),
 					alert.Name,
-					prepareTags(mft.Info.Tags),
+					prepareTags(manf.Info.Tags),
 				))
 			}
 		}
