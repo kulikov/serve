@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
+	"syscall"
 
 	"github.com/codegangsta/cli"
 
@@ -23,6 +25,26 @@ func main() {
 	app.Usage = "Automate your infrastructure!"
 
 	app.Commands = []cli.Command{
+		{
+			Name: "service",
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "manifest"},
+				cli.StringFlag{Name: "port"},
+			},
+			Subcommands: []cli.Command{
+				{
+					Name: "start",
+					SkipFlagParsing: true,
+					Action: func(c *cli.Context) {
+						err := syscall.Exec("/bin/bash", append([]string{"bash", "-c"}, strings.Join(c.Args(), " ")), os.Environ())
+
+						if err != nil {
+							log.Println(err)
+						}
+					},
+				},
+			},
+		},
 		{
 			Name: "manifest",
 			Flags: []cli.Flag{
