@@ -7,13 +7,13 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 
-	"../github"
-	"../utils"
-	"sync"
+	"github.com/kulikov/serve/github"
+	"github.com/kulikov/serve/utils"
 )
 
 type (
