@@ -21,7 +21,6 @@ type (
 
 	ElasticAlerts struct {
 		Name    string        `yaml:"name"`
-		Channel string        `yaml:"channel"`
 		Elastic *ElasticAlert `yaml:"elastic"`
 	}
 
@@ -71,7 +70,7 @@ func (ea ElasticAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) err
 					manf.Info.Name,
 					regexp.MustCompile(`\W+`).ReplaceAllString(strings.ToLower(alert.Name), "-"),
 					regexp.MustCompile(`[^\w\s:\-\.\(\)]+`).ReplaceAllString(el.Query, ""),
-					prepareChannel(conf.GetString("env"), alert.Channel),
+					prepareChannel(conf.GetString("env"), manf.Notification.Channel),
 				))
 			}
 		}

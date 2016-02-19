@@ -21,7 +21,6 @@ type (
 
 	GraphiteAlerts struct {
 		Name     string         `yaml:"name"`
-		Channel  string         `yaml:"channel"`
 		Graphite *GraphiteAlert `yaml:"graphite"`
 	}
 
@@ -64,7 +63,7 @@ func (ga GraphiteAlertPlugin) Run(conf *viper.Viper, manf *manifest.Manifest) er
 					warn,
 					crit,
 					regexp.MustCompile(`\s+`).ReplaceAllString(strings.Replace(g.Metric, `"`, `'`, -1), ""),
-					prepareChannel(conf.GetString("env"), alert.Channel),
+					prepareChannel(conf.GetString("env"), manf.Notification.Channel),
 				))
 			}
 		}
