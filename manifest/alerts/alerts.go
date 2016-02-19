@@ -75,7 +75,7 @@ func generateCheckMkFile(path string, checks []string) error {
 
 func prepareChannel(env string, channel string) string {
 	if env == "live" && channel != "" {
-		return " #" + strings.Trim(channel, " #")
+		return "#" + strings.Trim(channel, " #")
 	} else {
 		return ""
 	}
