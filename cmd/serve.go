@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/codegangsta/cli"
+	"github.com/kulikov/hookup"
 
 	"../gocd"
 	"../manifest"
@@ -56,10 +57,13 @@ func main() {
 			},
 			Subcommands: []cli.Command{
 				{
-					Name:  "github-hook",
-					Usage: "Handle github hook event and check manifest changes",
+					Name:  "webhook-server",
+					Usage: "Start webhook http sever and handle github hook event for check manifest changes",
 					Flags: []cli.Flag{
-						cli.StringFlag{Name: "payload"},
+						cli.StringFlag{
+							Name:  "port",
+							Value: "9090",
+						},
 					},
 					Action: func(c *cli.Context) {
 						conf, err := manifest.InitConfig(c.GlobalString("config"))
@@ -67,9 +71,13 @@ func main() {
 							log.Fatal(err)
 						}
 
-						if err := manifest.HandleGithubChanges(conf, manifestPlugins, c.String("payload")); err != nil {
-							log.Fatal(err)
-						}
+						hookup.StartWebhookServer(c.Int("port"), func(source string, eventType string, payload string) {
+							if (source == "github" && eventType == "push") {
+								if err := manifest.HandleGithubChanges(conf, manifestPlugins, payload); err != nil {
+									log.Printf("Error %v", err)
+								}
+							}
+						})
 					},
 				},
 			},
