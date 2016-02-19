@@ -87,10 +87,17 @@ func HandleGithubChanges(conf *viper.Viper, plugins []Plugin, payload string) er
 
 func InitConfig(configFile string) (*viper.Viper, error) {
 	conf := viper.New()
-	conf.SetConfigFile(configFile)
 	conf.SetConfigType("yml")
-	err := conf.ReadInConfig()
-	return conf, err
+
+	for _, file := range strings.Split(configFile, ",") {
+		conf.SetConfigFile(file)
+
+		if err := conf.MergeInConfig(); err != nil {
+			return nil, err
+		}
+	}
+
+	return conf, nil
 }
 
 func RunPlugins(conf *viper.Viper, plugins []Plugin, manf *Manifest) {
