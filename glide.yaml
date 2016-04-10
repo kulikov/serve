@@ -3,4 +3,5 @@ import:
 - package: github.com/spf13/viper
 - package: gopkg.in/yaml.v2
 - package: github.com/codegangsta/cli
+- package: github.com/hashicorp/consul/api
 - package: github.com/kulikov/hookup
