@@ -1,0 +1,36 @@
+
+{{- with $data := plugin "/Users/kulikov/Work/inn/staff/consul/bin/nginx_tree" | parseJSON}}
+
+{{range $upstream, $addresses := $data.upstreams}}
+upstream {{$upstream}} {
+  {{- range $addr := $addresses}}
+    server {{$addr.address}}:{{$addr.port}};
+  {{- end}}
+}
+{{end}}
+
+{{range $host, $locations := $data.servers}}
+server {
+  listen 80;
+  server_name {{$host}};
+
+  {{range $location, $ups := $locations}}
+  location {{$location}} {
+    {{- if $ups.stage}}
+      if ($is_staging = "stage") {
+        proxy_pass http://{{$ups.stage}}/;
+      }
+
+      {{- if $ups.live}}
+      if ($is_staging = "live") {
+          proxy_pass http://{{$ups.live}}/;
+      }
+      {{- end}}
+    {{- else}}
+      proxy_pass http://{{$ups.live}}/;
+    {{- end}}
+  }
+  {{end}}
+}
+{{end}}
+{{- end}}
