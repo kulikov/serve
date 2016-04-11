@@ -1,5 +1,5 @@
 
-{{- with $data := plugin "/Users/kulikov/Work/inn/staff/consul/bin/nginx_tree" | parseJSON}}
+{{- with $data := plugin "/vagrant/serve" "consul" "nginx-tempalte-context" | parseJSON}}
 
 {{range $upstream, $addresses := $data.upstreams}}
 upstream {{$upstream}} {
