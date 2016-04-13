@@ -62,18 +62,18 @@ func ConsulCommand() cli.Command {
 								}
 
 								location, ok := params["location"]
-								if ok == false {
+								if !ok {
 									location = "/"
 								}
 
 								staging, ok := params["staging"]
-								if ok == false {
+								if !ok {
 									staging = "live"
 								}
 
 								upstream := upstreamRegex.ReplaceAllString("ups_"+params["host"]+"_"+location+"_"+staging, "_")
 
-								if _, ok := upstreams[upstream]; ok == false {
+								if _, ok := upstreams[upstream]; !ok {
 									upstreams[upstream] = make([]map[string]interface{}, 0)
 								}
 
@@ -82,15 +82,15 @@ func ConsulCommand() cli.Command {
 									"port":    serv.Service.Port,
 								})
 
-								if _, ok := servers[params["host"]]; ok == false {
+								if _, ok := servers[params["host"]]; !ok {
 									servers[params["host"]] = make(map[string]map[string]string, 0)
 								}
 
-								if _, ok := servers[params["host"]][location]; ok == false {
+								if _, ok := servers[params["host"]][location]; !ok {
 									servers[params["host"]][location] = make(map[string]string, 0)
 								}
 
-								if _, ok := servers[params["host"]][location][staging]; ok == false {
+								if _, ok := servers[params["host"]][location][staging]; !ok {
 									servers[params["host"]][location][staging] = upstream
 								}
 							}
