@@ -1,3 +1,4 @@
+{{- range services}}{{range service .Name}}{{end}}{{end -}}
 
 {{- with $data := plugin "/vagrant/serve" "consul" "nginx-tempalte-context" | parseJSON}}
 

@@ -17,7 +17,7 @@ import (
 
 func ServiceCommand() cli.Command {
 	return cli.Command{
-		Name: "service",
+		Name:  "service",
 		Usage: "Run and release services",
 		Flags: []cli.Flag{
 			cli.StringFlag{Name: "name"},
@@ -46,25 +46,6 @@ func ServiceCommand() cli.Command {
 
 					serviceId := c.GlobalString("name") + "-" + c.GlobalString("version") + "-" + c.GlobalString("port")
 
-					if err := consul.Agent().ServiceRegister(&api.AgentServiceRegistration{
-						ID:   serviceId,
-						Name: c.GlobalString("name"),
-						Tags: []string{
-							"version:" + c.GlobalString("version"),
-							"host:" + c.GlobalString("host"),
-							"location:" + c.GlobalString("location"),
-							"staging:" + c.GlobalString("staging"),
-						},
-						Port:              c.GlobalInt("port"),
-						EnableTagOverride: true,
-						Check: &api.AgentServiceCheck{
-							TCP:      "localhost:" + c.GlobalString("port"),
-							Interval: "5s",
-						},
-					}); err != nil {
-						log.Fatal(err)
-					}
-
 					go func() {
 						result := cmd.Wait()
 						log.Printf("Command finished with: %v", result)
@@ -90,10 +71,32 @@ func ServiceCommand() cli.Command {
 						}
 					}()
 
+					if err := consul.Agent().ServiceRegister(&api.AgentServiceRegistration{
+						ID:   serviceId,
+						Name: c.GlobalString("name"),
+						Tags: []string{
+							"version:" + c.GlobalString("version"),
+							"host:" + c.GlobalString("host"),
+							"location:" + c.GlobalString("location"),
+							"staging:" + c.GlobalString("staging"),
+						},
+						Port:              c.GlobalInt("port"),
+						EnableTagOverride: true,
+						Check: &api.AgentServiceCheck{
+							TCP:      "localhost:" + c.GlobalString("port"),
+							Interval: "5s",
+						},
+					}); err != nil {
+						cmd.Process.Kill()
+						log.Fatal(err)
+					}
+
 					// Handle SIGINT and SIGTERM.
 					ch := make(chan os.Signal)
-					signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+					signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 					log.Println(<-ch)
+
+					cmd.Process.Kill()
 
 					time.Sleep(time.Second)
 					log.Println("Stopped.")
