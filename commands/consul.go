@@ -34,7 +34,7 @@ func ConsulCommand() cli.Command {
 					}
 
 					for s, allTags := range allServices {
-						if _, ok := ParseTags(allTags)["host"]; ok {
+						if _, ok := ParseTags(allTags)["domain"]; ok {
 							services, _, err := consul.Health().Service(s, "", true, &api.QueryOptions{})
 							if err != nil {
 								panic(err)
@@ -58,7 +58,7 @@ func ConsulCommand() cli.Command {
 									staging = "live"
 								}
 
-								upstream := upstreamNameRegex.ReplaceAllString("ups_"+tags["host"]+"_"+location+"_"+staging, "_")
+								upstream := upstreamNameRegex.ReplaceAllString("ups_"+tags["domain"]+"_"+location+"_"+staging, "_")
 
 								if _, ok := upstreams[upstream]; !ok {
 									upstreams[upstream] = make([]map[string]interface{}, 0)
@@ -69,16 +69,16 @@ func ConsulCommand() cli.Command {
 									"port":    serv.Service.Port,
 								})
 
-								if _, ok := servers[tags["host"]]; !ok {
-									servers[tags["host"]] = make(map[string]map[string]string, 0)
+								if _, ok := servers[tags["domain"]]; !ok {
+									servers[tags["domain"]] = make(map[string]map[string]string, 0)
 								}
 
-								if _, ok := servers[tags["host"]][location]; !ok {
-									servers[tags["host"]][location] = make(map[string]string, 0)
+								if _, ok := servers[tags["domain"]][location]; !ok {
+									servers[tags["domain"]][location] = make(map[string]string, 0)
 								}
 
-								if _, ok := servers[tags["host"]][location][staging]; !ok {
-									servers[tags["host"]][location][staging] = upstream
+								if _, ok := servers[tags["domain"]][location][staging]; !ok {
+									servers[tags["domain"]][location][staging] = upstream
 								}
 							}
 						}

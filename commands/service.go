@@ -21,7 +21,7 @@ func ServiceCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{Name: "name"},
 			cli.StringFlag{Name: "version", Value: "0.0"},
-			cli.StringFlag{Name: "host"},
+			cli.StringFlag{Name: "domain"},
 			cli.StringFlag{Name: "location"},
 			cli.StringFlag{Name: "staging"},
 			cli.StringFlag{Name: "port"},
@@ -140,8 +140,8 @@ func tagsFromFlags(c *cli.Context) map[string]string {
 		tags["version"] = t
 	}
 
-	if t := c.GlobalString("host"); t != "" {
-		tags["host"] = t
+	if t := c.GlobalString("domain"); t != "" {
+		tags["domain"] = t
 	}
 
 	if t := c.GlobalString("location"); t != "" {

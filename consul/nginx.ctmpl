@@ -10,10 +10,10 @@ upstream {{$upstream}} {
 }
 {{end}}
 
-{{range $host, $locations := $data.servers}}
+{{range $domain, $locations := $data.servers}}
 server {
   listen 80;
-  server_name {{$host}};
+  server_name {{$domain}};
 
   {{range $location, $ups := $locations}}
   location {{$location}} {
