@@ -18,9 +18,9 @@ import (
 
 type (
 	Manifest struct {
-		Sha          string
-		GitSshUrl    string
-		Source       []byte
+		Sha       string
+		GitSshUrl string
+		Source    []byte
 
 		Info         Info         `yaml:"info"`
 		Notification Notification `yaml:"notification"`
