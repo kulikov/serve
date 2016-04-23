@@ -3,10 +3,13 @@ machine:
     GO15VENDOREXPERIMENT: 1
     WORK_DIR: $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
-dependencies:
-  override:
+checkout:
+  post:
     - mkdir -p $WORK_DIR
     - cp -Rfp $HOME/$CIRCLE_PROJECT_REPONAME/* $WORK_DIR/
+
+dependencies:
+  override:
     - go get github.com/Masterminds/glide
     - cd $WORK_DIR && glide install
 
