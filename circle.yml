@@ -3,19 +3,16 @@ machine:
     GO15VENDOREXPERIMENT: 1
     WORK_DIR: $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
-checkout:
-  post:
-    - mkdir -p $WORK_DIR
-    - cp -Rfp $HOME/$CIRCLE_PROJECT_REPONAME/* $WORK_DIR/
-
 dependencies:
   override:
+    - mkdir -p $WORK_DIR
+    - rsync -azC --delete $HOME/$CIRCLE_PROJECT_REPONAME/ $WORK_DIR/
     - go get github.com/Masterminds/glide
     - cd $WORK_DIR && glide install
 
 test:
   override:
-    - cd $WORK_DIR && go test
+    - cd $WORK_DIR && go test cmd/serve.go
 
 deployment:
   master:
