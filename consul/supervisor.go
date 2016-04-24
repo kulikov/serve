@@ -1,4 +1,4 @@
-package commands
+package consul
 
 import (
 	"log"
@@ -10,14 +10,12 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/hashicorp/consul/api"
-
-	"github.com/kulikov/serve/utils"
 )
 
-func ServiceCommand() cli.Command {
+func SupervisorCommand() cli.Command {
 	return cli.Command{
-		Name:  "service",
-		Usage: "Run and release services",
+		Name:  "supervisor",
+		Usage: "Wrapper for registering service into consul and remove it after stop",
 		Flags: []cli.Flag{
 			cli.StringFlag{Name: "name"},
 			cli.StringFlag{Name: "version", Value: "0.0"},
@@ -70,11 +68,11 @@ func ServiceCommand() cli.Command {
 						}
 					}()
 
-					// Register service to consul
+					// Register service into consul
 					if err := consul.Agent().ServiceRegister(&api.AgentServiceRegistration{
 						ID:                serviceId,
 						Name:              c.GlobalString("name"),
-						Tags:              mapToList(tagsFromFlags(c)),
+						Tags:              MapToList(TagsFromFlags(c)),
 						Port:              c.GlobalInt("port"),
 						EnableTagOverride: true,
 						Check: &api.AgentServiceCheck{
@@ -97,68 +95,6 @@ func ServiceCommand() cli.Command {
 					log.Println("Stopped.")
 				},
 			},
-			{
-				Name: "release",
-				Action: func(c *cli.Context) {
-					consul, _ := api.NewClient(api.DefaultConfig())
-
-					if staged, _, err := consul.Catalog().Service(c.GlobalString("name"), "version:"+c.GlobalString("version"), &api.QueryOptions{}); err == nil {
-						for _, serv := range staged {
-							if _, err := consul.Catalog().Register(&api.CatalogRegistration{
-								Node:    serv.Node,
-								Address: serv.Address,
-								Service: &api.AgentService{
-									ID:                serv.ServiceID,
-									Service:           serv.ServiceName,
-									Tags:              mapToList(utils.MergeMaps(ParseTags(serv.ServiceTags), tagsFromFlags(c))),
-									Port:              serv.ServicePort,
-									Address:           serv.ServiceAddress,
-									EnableTagOverride: serv.ServiceEnableTagOverride,
-								},
-								Check: &api.AgentCheck{
-									Node:        serv.Node,
-									CheckID:     "service:" + serv.ServiceID,
-									ServiceID:   serv.ServiceID,
-									ServiceName: serv.ServiceName,
-									Status:      api.HealthPassing,
-								},
-							}, &api.WriteOptions{}); err != nil {
-								log.Println("Register:", err)
-							}
-						}
-					}
-				},
-			},
 		},
 	}
-}
-
-func tagsFromFlags(c *cli.Context) map[string]string {
-	tags := make(map[string]string, 0)
-
-	if t := c.GlobalString("version"); t != "" {
-		tags["version"] = t
-	}
-
-	if t := c.GlobalString("domain"); t != "" {
-		tags["domain"] = t
-	}
-
-	if t := c.GlobalString("location"); t != "" {
-		tags["location"] = t
-	}
-
-	if t := c.GlobalString("staging"); t != "" {
-		tags["staging"] = t
-	}
-
-	return tags
-}
-
-func mapToList(m map[string]string) []string {
-	out := make([]string, 0)
-	for k, v := range m {
-		out = append(out, k+":"+v)
-	}
-	return out
 }
