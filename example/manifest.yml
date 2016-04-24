@@ -11,30 +11,27 @@ notify:
   channel: alert-api2
 
 build:
-  branch: master
-  # branch: ^feature-(<branch>.*)
-  commands:
-    - sbt ';set version := "'${MANIFEST_VERSION}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
+  - sbt ';set version := "'${MANIFEST_VERSION}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
 
-    - marathon:
-        package: target/package.tar.gz
+  - marathon:
+      package: target/package.tar.gz
 
-    - debian:
-        user: innova
-        daemon:
-          path: $APPLICATION_PATH/bin/start
-          args: |
-            -Xmx$("mem_${ENV_NAME}")
-            -DSERVICE_NAME=$NAME
-            -Dfile.encoding=UTF-8
-            -Dconfig.localfile=$APPLICATION_PATH/conf/env.${ENV_NAME}-${AREA_NAME}.conf;$NEW_SECURE_CONFIG_FILE
-            -Dlogback.configurationFile=$APPLICATION_PATH/conf/logback.xml
-        mem: { qa: 256, live: 512 }
-        make_pidfile: yes
-        deploy_root: /local/innova/www-versions
+  - debian:
+      user: innova
+      daemon:
+        path: $APPLICATION_PATH/bin/start
+        args: |
+          -Xmx$("mem_${ENV_NAME}")
+          -DSERVICE_NAME=$NAME
+          -Dfile.encoding=UTF-8
+          -Dconfig.localfile=$APPLICATION_PATH/conf/env.${ENV_NAME}-${AREA_NAME}.conf;$NEW_SECURE_CONFIG_FILE
+          -Dlogback.configurationFile=$APPLICATION_PATH/conf/logback.xml
+      mem: { qa: 256, live: 512 }
+      make_pidfile: yes
+      deploy_root: /local/innova/www-versions
 
-    - docker:
-      ...
+  - docker:
+    ...
 
 deploy:
   site:
