@@ -46,9 +46,9 @@ serve marathon deploy-task \
 # находим предыдущую версию и убираем ее сначала из консула, потом из марафона
 # todo: надо подумать как находить полную версию только по build-number
 # --branch 'master' — опционально поле, 'master' по-умолчанию
-serve marathon deploy --env 'qa' --branch 'master' --build-number '34'
+serve deploy --env 'qa' --branch 'master' --build-number '34'
 
 # меняем staging:stage --> staging:live в консуле
 # удаляем предыдущий live из консула
 # стопаем предыдущий live в фарафоне (через 3 минуты)
-serve marathon release --env 'live' --build-number '34'
+serve release --env 'live' --build-number '34'
