@@ -37,7 +37,8 @@ serve marathon deploy-task \
   --envs '{"ENV":"qa"}'
 
 
-# вариант с manifest.yaml:
+# вариант с manifest.yaml
+
 # для serve на Го машинках нужен будет /etc/serve/config.yml, 
 # в котором будут адреса марафона, реестра пакетов и прочие конфиги
 
