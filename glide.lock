@@ -1,12 +1,18 @@
 hash: 5f9a4b528bf2d2b79fb9301288b090482f49ff4de58834e7a1ff34d914400079
-updated: 2016-04-17T12:10:26.122134334+03:00
+updated: 2016-04-24T12:13:52.374819902+03:00
 imports:
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
 - name: github.com/codegangsta/cli
   version: 71f57d300dd6a780ac1856c005c4b518cfd498ec
+- name: github.com/donovanhide/eventsource
+  version: c3f57f280ec708df24886d9e62f2fd178d69d8e8
 - name: github.com/gambol99/go-marathon
   version: 8953f682004f048ab785dee17cb667e44c6ee8e2
+- name: github.com/google/go-querystring
+  version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
+  subpackages:
+  - query
 - name: github.com/hashicorp/consul
   version: 16f34bfa304e81030d5a63ec15733f41c6fc208c
   subpackages:
