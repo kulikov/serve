@@ -12,7 +12,7 @@ notify:
 
 build:
   branch: master
-  branch: ^feature-(<branch>.*)
+  # branch: ^feature-(<branch>.*)
   commands:
     - sbt ';set version := "'${MANIFEST_VERSION}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
 
@@ -21,7 +21,7 @@ build:
 
     - debian:
         user: innova
-        daemon: 
+        daemon:
           path: $APPLICATION_PATH/bin/start
           args: |
             -Xmx$("mem_${ENV_NAME}")
@@ -37,21 +37,40 @@ build:
       ...
 
 deploy:
-  debian:
-    cluster:
-      qa: graphite.qa.inn.ru
-      live: graphite.lux.inn.eu
+  site:
+    routes:
+      - domain: { qa: api.4gametest.com, live: api.4game.com }
+        location: /v2/
+      - domain: { qa: api2.4gametest.com, live: api2.4game.com }
+        location: /
+      - domain: { qa: go.4gametest.com, live: go.4game.com }
+        location: /
 
-  marathon:
-    routing:
-      domain:
-        qa: api.4gametest.com go.4gametest.com
-        live: api.4game.com go.4game.com
-      location: /v2/
-    ports: ["http:9024", "jmx:22006"]
-    instances: { qa: 1, live: 4 }
-    mem: 512
-    cpu: 1
+    debian:
+      cluster: { qa: cpb.qa.inn.ru, live: cpb.lux.inn.eu }
+
+    marathon:
+      instances: { qa: 1, live: 4 }
+      mem: { qa: 265, live: 768 }
+      cpu: { qa: 0.2, live: 3 }
+
+  feature-site:
+    branch: "^feature-(<branch>.*)$"
+
+    routes:
+      - domain: "{{branch}}.4gametest.com"
+        location: /
+
+    marathon:
+      instances: 1
+      mem: 256
+      cpu: 0.1
+
+  service:
+    marathon:
+      instances: { qa: 1, live: 4 }
+      mem: { qa: 265, live: 768 }
+      cpu: { qa: 0.2, live: 3 }
 
 alerts:
   - name: RPS
