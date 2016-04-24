@@ -22,7 +22,7 @@ serve consul supervisor \
   --location '/v3/' \
   --staging 'live' \
   --port 12073
-  bin/start
+  start bin/start
 
 
 # вариант без использования manifest.yml
