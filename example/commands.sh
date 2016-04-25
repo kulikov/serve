@@ -6,14 +6,18 @@
 # - собираем пакет и загружаем артефакты в репозиторий (apt, task-regestry, maven, etc)
 serve build --build-number '34' --branch 'master'
 
-# - запускаем новую версию, дожидаемся появления в консуле (--branch 'master' — опционально поле, 'master' по-умолчанию)
-# - находим предыдущую версию и убираем ее сначала из консула, потом из марафона (через 3 минуты)
+# - запускаем новую версию,
+# - дожидаемся появления в консуле
 serve deploy --env 'qa' --build-number '34' --branch 'master'
 
-# - меняем staging:stage --> staging:live в консуле (todo: надо подумать как находить полную версию только по build-number)
-# - удаляем предыдущий live из консула
-# - стопаем предыдущий live в фарафоне (через 3 минуты)
-serve release --env 'live' --build-number '34'
+# - находим сервис в консуле
+# - добавляем ему роутинг-параметры чтобы он в nginx попал
+# - удаляем предыдущую версию с таким же staging из консула
+# - стопаем предыдущую версию с таким же staging в марафоне (через 3 минуты)
+serve release --env 'qa' --build-number '34' --branch 'master'   # --branch опционально поле, по-умолчанию master
+
+serve release --env 'live' --staging 'stage' --build-number '34'
+serve release --env 'live' --staging 'live' --build-number '34'
 
 
 # скрипт-wrapper для регистрации
