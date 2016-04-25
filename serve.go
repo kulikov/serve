@@ -19,6 +19,7 @@ func main() {
 	app.Commands = []cli.Command{
 		consul.ConsulCommand(),
 		marathon.MarathonCommand(),
+		deploy.BuildCommand(),
 		deploy.DeployCommand(),
 		deploy.ReleaseCommand(),
 		github.WebhookServerCommand(),

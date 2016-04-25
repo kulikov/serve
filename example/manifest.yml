@@ -31,7 +31,7 @@ build:
       deploy_root: /local/innova/www-versions
 
   - docker:
-    ...
+      ...
 
 deploy:
   site:
@@ -42,32 +42,22 @@ deploy:
         location: /
       - domain: { qa: go.4gametest.com, live: go.4game.com }
         location: /
-
-    debian:
-      cluster: { qa: cpb.qa.inn.ru, live: cpb.lux.inn.eu }
-
     marathon:
+      cmd: bin/start
       instances: { qa: 1, live: 4 }
       mem: { qa: 265, live: 768 }
       cpu: { qa: 0.2, live: 3 }
 
-  feature-site:
+  featured-site:
     branch: "^feature-(<branch>.*)$"
-
     routes:
       - domain: "{{branch}}.4gametest.com"
         location: /
-
     marathon:
+      cmd: bin/start
       instances: 1
       mem: 256
       cpu: 0.1
-
-  service:
-    marathon:
-      instances: { qa: 1, live: 4 }
-      mem: { qa: 265, live: 768 }
-      cpu: { qa: 0.2, live: 3 }
 
 alerts:
   - name: RPS
@@ -90,3 +80,6 @@ alerts:
       from: 10min
       warn: 1
       crit: 10
+
+
+

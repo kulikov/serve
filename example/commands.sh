@@ -1,18 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# для serve на Go машинках нужен будет /etc/serve/config.yml, 
+# для serve на Go машинках нужен будет /etc/serve/config.yml,
 # в котором будут адреса марафона, реестра пакетов и прочие конфиги
 
-# 1. запускаем новую версию, дожидаемся появления в консуле
-# 2. находим предыдущую версию и убираем ее сначала из консула, потом из марафона
-# todo: надо подумать как находить полную версию только по build-number
-# --branch 'master' — опционально поле, 'master' по-умолчанию
+# - собираем пакет и загружаем артефакты в репозиторий (apt, task-regestry, maven, etc)
+serve build --branch 'master' --build-number '34'
+
+# - запускаем новую версию, дожидаемся появления в консуле (--branch 'master' — опционально поле, 'master' по-умолчанию)
+# - находим предыдущую версию и убираем ее сначала из консула, потом из марафона (через 3 минуты)
 serve deploy --env 'qa' --branch 'master' --build-number '34'
 
-# 1. меняем staging:stage --> staging:live в консуле
-# 2. удаляем предыдущий live из консула
-# 3. стопаем предыдущий live в фарафоне (через 3 минуты)
+# - меняем staging:stage --> staging:live в консуле (todo: надо подумать как находить полную версию только по build-number)
+# - удаляем предыдущий live из консула
+# - стопаем предыдущий live в фарафоне (через 3 минуты)
 serve release --env 'live' --build-number '34'
+
 
 # скрипт-wrapper для регистрации
 serve consul supervisor \
@@ -22,7 +24,7 @@ serve consul supervisor \
   --location '/v3/' \
   --staging 'live' \
   --port 12073
-  start bin/start
+  start bin/start -Xmx521m ...
 
 
 # вариант без использования manifest.yml
