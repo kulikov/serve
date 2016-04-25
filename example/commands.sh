@@ -4,11 +4,11 @@
 # в котором будут адреса марафона, реестра пакетов и прочие конфиги
 
 # - собираем пакет и загружаем артефакты в репозиторий (apt, task-regestry, maven, etc)
-serve build --branch 'master' --build-number '34'
+serve build --build-number '34' --branch 'master'
 
 # - запускаем новую версию, дожидаемся появления в консуле (--branch 'master' — опционально поле, 'master' по-умолчанию)
 # - находим предыдущую версию и убираем ее сначала из консула, потом из марафона (через 3 минуты)
-serve deploy --env 'qa' --branch 'master' --build-number '34'
+serve deploy --env 'qa' --build-number '34' --branch 'master'
 
 # - меняем staging:stage --> staging:live в консуле (todo: надо подумать как находить полную версию только по build-number)
 # - удаляем предыдущий live из консула
