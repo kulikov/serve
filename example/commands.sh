@@ -31,7 +31,7 @@ serve consul supervisor \
   start bin/start -Xmx521m ...
 
 
-# вариант без использования manifest.yml
+# OPTIONAL: вариант без использования manifest.yml
 
 serve marathon deploy-site \
   --marathon 'mesos1-q.qa.inn.ru' \
