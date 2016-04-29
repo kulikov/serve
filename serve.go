@@ -4,8 +4,9 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+
+	appCmd "github.com/kulikov/serve/app"
 	"github.com/kulikov/serve/consul"
-	"github.com/kulikov/serve/deploy"
 	"github.com/kulikov/serve/github"
 	"github.com/kulikov/serve/marathon"
 )
@@ -17,11 +18,9 @@ func main() {
 	app.Usage = "Automate your infrastructure!"
 
 	app.Commands = []cli.Command{
+		appCmd.AppCommand(),
 		consul.ConsulCommand(),
 		marathon.MarathonCommand(),
-		deploy.BuildCommand(),
-		deploy.DeployCommand(),
-		deploy.ReleaseCommand(),
 		github.WebhookServerCommand(),
 	}
 

@@ -1,4 +1,4 @@
-package deploy
+package app
 
 import (
 	"log"
@@ -6,16 +6,17 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func BuildCommand() cli.Command {
+func DeployCommand() cli.Command {
 	return cli.Command{
-		Name:  "build",
-		Usage: "Duild package",
+		Name:  "deploy",
+		Usage: "Deploy service",
 		Flags: []cli.Flag{
+			cli.StringFlag{Name: "env"},
 			cli.StringFlag{Name: "branch"},
 			cli.StringFlag{Name: "build-number"},
 		},
 		Action: func(c *cli.Context) {
-			log.Println("build")
+			log.Println("deploy")
 		},
 	}
 }

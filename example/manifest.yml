@@ -1,85 +1,86 @@
 info:
   name: forgame-api2
-  description: API v2
+  description: 4game REST API v2
   version: 2.0
-  category: site
+  category: service/http
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
 
+include:
+  - samza-task:
+      mem: { qa: 256, live: 1024 }
+
 notify:
-  channel: alert-api2
+  - slack: alert-api2
 
 build:
-  - sbt ';set version := "'${MANIFEST_VERSION}'"' clean test pack && tar -zcf "target/package.tar.gz" -C target/pack/ .
+  - shell: sbt ';set version := "'${SERVE_BUILD_VERSION}'"' clean test pack
 
-  - marathon:
-      package: target/package.tar.gz
+  - marathon: { package: target/pack }
 
   - debian:
       user: innova
       daemon:
-        path: $APPLICATION_PATH/bin/start
-        args: |
-          -Xmx$("mem_${ENV_NAME}")
-          -DSERVICE_NAME=$NAME
-          -Dfile.encoding=UTF-8
-          -Dconfig.localfile=$APPLICATION_PATH/conf/env.${ENV_NAME}-${AREA_NAME}.conf;$NEW_SECURE_CONFIG_FILE
-          -Dlogback.configurationFile=$APPLICATION_PATH/conf/logback.xml
-      mem: { qa: 256, live: 512 }
-      make_pidfile: yes
-      deploy_root: /local/innova/www-versions
+        bin: $APPLICATION_PATH/bin/start
+        args: --port=$PORT1 --env=qa
 
-  - docker:
-      ...
+  - docker: {}
 
 deploy:
   site:
+    branch: master # by default
+
     routes:
       - domain: { qa: api.4gametest.com, live: api.4game.com }
         location: /v2/
       - domain: { qa: api2.4gametest.com, live: api2.4game.com }
-        location: /
       - domain: { qa: go.4gametest.com, live: go.4game.com }
-        location: /
+
     marathon:
-      cmd: bin/start
       instances: { qa: 1, live: 4 }
-      mem: { qa: 265, live: 768 }
+      mem: { qa: 256, live: 1024 }
       cpu: { qa: 0.2, live: 3 }
 
+    debian:
+      cluster: { qa: cpb.qa.inn.ru, live: cpb.lux.inn.eu }
+
   featured-site:
-    branch: "^feature-(<branch>.*)$"
+    branch: "^feature-(<feature>.*)$"
+
     routes:
-      - domain: "{{branch}}.4gametest.com"
-        location: /
+      - domain: "{{feature}}.4gametest.com"
+        location: /some_location/
+
+    debian:
+      cluster: cpb.qa.inn.ru
+
+  service:
     marathon:
       cmd: bin/start
       instances: 1
       mem: 256
-      cpu: 0.1
 
-alerts:
-  - name: RPS
-    graphite:
-      metric: sumSeries(inn.*.kidzania.api.http.timer.all.m5_rate)
-      warn.max: 3000
-      crit.max: 4000
-      warn: { live: 200 }
-      crit: { live: 100 }
+    debian:
+      cluster: cpb.qa.inn.ru
 
-  - name: Request time
-    graphite:
-      metric: averageSeries(inn.*.kidzania.api.http.timer.all.p75)
-      warn.max: { live: 15 }
-      crit.max: { live: 30 }
+monitoring:
+  alerts:
+    - name: RPS
+      graphite:
+        metric: sumSeries(inn.*.kidzania.api.http.timer.all.m5_rate)
+        warn.max: 3000
+        crit.max: 4000
 
-  - name: Errors rate
-    elastic:
-      query: tag:"kidzania-api" AND level:ERROR
-      from: 10min
-      warn: 1
-      crit: 10
+    - name: Request time
+      graphite:
+        metric: averageSeries(inn.*.kidzania.api.http.timer.all.p75)
+        warn.max: { live: 15 }
+        crit.max: { live: 30 }
 
-
-
+    - name: Errors rate
+      elastic:
+        query: tag:"kidzania-api" AND level:ERROR
+        from: 10min
+        warn: 1
+        crit: 10

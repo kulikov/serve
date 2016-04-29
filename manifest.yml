@@ -1,52 +1,16 @@
 info:
   name: serve
-  description: Infrastructure automation tools
+  description: Infrastructure platform
   version: 1.0
   category: tools
   owner:
     name: Dmitry Kulikov
     email: kulikov.dm@gmail.com
 
-notification:
-  channel: kidzania-site
-
 build:
   - debian: {}
 
 deploy:
-  debian:
-    cluster:
-      qa: graphite.qa.inn.ru
-      live: graphite.lux.inn.eu
-
-  marathon:
-    http-balancer:
-      domain:
-        qa: api.kidzite.qa
-        live: api.kidzania.ru api.kidzite.space
-    ports: ["http:9024", "jmx:22006"]
-    instances: { qa: 1, live: 4 }
-    mem: 512
-    cpu: 1
-
-alerts:
-  - name: RPS
-    graphite:
-      metric: sumSeries(inn.*.kidzania.api.http.timer.all.m5_rate)
-      warn.max: 3000
-      crit.max: 4000
-      warn: { live: 200 }
-      crit: { live: 100 }
-
-  - name: Request time
-    graphite:
-      metric: averageSeries(inn.*.kidzania.api.http.timer.all.p75)
-      warn.max: { live: 15 }
-      crit.max: { live: 30 }
-
-  - name: Errors rate
-    elastic:
-      query: tag:"kidzania-api" AND level:ERROR
-      from: 10min
-      warn: 1
-      crit: 10
+  tools:
+    debian:
+      cluster: go2-ti.msk.inn.ru go3-ti.msk.inn.ru go4-ti.msk.inn.ru
