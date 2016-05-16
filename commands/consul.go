@@ -75,6 +75,7 @@ func ConsulCommand() cli.Command {
 
 								if _, ok := servers[tags["domain"]][location]; !ok {
 									servers[tags["domain"]][location] = make(map[string]string, 0)
+									servers[tags["domain"]][location]["service"] = serv.Service.Service
 								}
 
 								if _, ok := servers[tags["domain"]][location][staging]; !ok {
